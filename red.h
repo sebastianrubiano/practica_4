@@ -6,6 +6,9 @@
 #include <map>
 #include <limits>
 #include <algorithm>
+#include <random>
+#include <ctime>
+#include <set>
 
 
 class red
@@ -28,7 +31,8 @@ public:
     void eliminar_todo();
     void cargarRedDesdeArchivo(const string& nombreArchivo);
     void guardarRedEnArchivo(const string &nombreArchivo);
-    void Dijkstra(string origen);
+    void Dijkstra(string origen, string destino);
+    void Erdos_renyi(int N_enrutadores, int Probabilidad);
 };
 
 #endif // RED_H

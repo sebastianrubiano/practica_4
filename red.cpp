@@ -269,6 +269,7 @@ void red::cargarRedDesdeArchivo(const string &nombreArchivo)
         Inserta_enrutador(destino);
 
         Inserta_arista(nombre,destino,distancia);
+        Inserta_arista(destino,nombre,distancia);
     }
     archivo.close();
 }
@@ -304,10 +305,11 @@ bool CostoMinimo(const pair<enrutador*, int>& a, const pair<enrutador*, int>& b)
 }
 
 
-void red::Dijkstra(string origen)
+void red::Dijkstra(string origen, string destino)
 {
     enrutador* Ruter_ori = Obtenerenrutador(origen);
-    if (Ruter_ori == NULL)
+    enrutador* Ruter_des = Obtenerenrutador(destino);
+    if (Ruter_ori == NULL or Ruter_des == NULL)
     {
         cout << "El enrutador no existe" << endl;
     }
@@ -370,23 +372,74 @@ void red::Dijkstra(string origen)
 
             cola.erase(iter->first);
         }
-
-        for (map<enrutador*, int>::iterator i = distancias.begin(); i != distancias.end(); i++)
-            cout << i->first->nombre << ": " << i->second << endl;
-
-
-        // Muestra las rutas completas
-        for (map<enrutador*, enrutador*>::iterator i = rutas.begin(); i != rutas.end(); i++)
+        cout << "Distancia mínima desde " << origen << " a " << destino << ": " << distancias[Ruter_des] << endl;
+        cout << "Ruta desde " << origen << " a " << destino << ": ";
+        enrutador* vActual = Ruter_des;
+        while (vActual != NULL)
         {
-            enrutador* vAct = i->first;
-
-            while (vAct != NULL)
+            cout << vActual->nombre;
+            if (vActual != Ruter_ori) 
             {
-                cout << vAct->nombre << " <- ";
-                vAct = rutas[vAct];
+                cout << "<-";
             }
-
-            cout << endl;
+            vActual = rutas[vActual];
         }
+        cout << endl;
     }
+    
+}
+
+int GenerarCadenaAleatoria(int min, int max) {
+    random_device rd;
+    mt19937 generador(rd());
+    uniform_int_distribution<int> distribucion(min, max);
+    int numero = distribucion(generador);
+    return numero;
+}
+
+void red::Erdos_renyi(int N_enrutadores, int Probabilidad)
+{
+    map<enrutador*, map<enrutador*, int>> matriz;
+
+    map<string, map<string, int>> distancias;
+    
+    int j = 1;
+        for (int i = 1; i <= N_enrutadores; ++i)
+        {
+            string nodeName = "";
+            for (int k = 1; i <= j; ++i) 
+            {
+                string cadena = string(1, static_cast<char>(GenerarCadenaAleatoria(65, 90)));
+                nodeName += cadena;
+            }
+            if (i == 25*j)
+                {
+                    j= j +1;
+                }
+            
+            Inserta_enrutador(nodeName);
+        }
+        
+        default_random_engine generator(time(0));
+        uniform_real_distribution<double> distribution(0.0, 1.0);
+        uniform_int_distribution<int> weight_distribution(1, 100);
+
+        enrutador* i = primero;
+        while (i != NULL)
+        {
+            arista* j = i->ari;
+
+            while (j != NULL)
+            {
+                if (i ->nombre == j->destino->nombre ) {
+                    continue;  // No se permiten bucles
+                }
+                double random_value = distribution(generator);
+                if (random_value < Probabilidad) {
+                    int distancia = weight_distribution(generator);
+                    Inserta_arista(i ->nombre, j->destino->nombre, distancia);
+                    Inserta_arista(j->destino->nombre, i ->nombre, distancia);
+                }
+            }
+        }
 }

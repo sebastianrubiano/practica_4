@@ -22,9 +22,6 @@ private:
 public:
     arista(enrutador* _destino, int distancia);
     ~arista();
-
-private:
-
 };
 
 #endif
