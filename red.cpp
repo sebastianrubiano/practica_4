@@ -104,6 +104,23 @@ void red::MostrarLista()
     }
 }
 
+void red::MostrarMatris()
+{
+     enrutador* i = primero;
+    while (i != NULL)
+    {
+        cout << "|  | "    << i ->nombre;
+        arista* j = i->ari;
+
+        while (j != NULL)
+        {
+            cout << "| "<< j->destino->nombre << " | " << j->distancia << " |" << endl  ;
+            j = j->sig;
+        } 
+        i = i->sig;
+    }
+}
+
 void red::eliminar_aristas(enrutador *ruter)
 {
     if (ruter == NULL)
