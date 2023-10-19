@@ -20,15 +20,15 @@ enrutador* red::Obtenerenrutador(string _nombre)
 {
     enrutador* i = primero;
     while (i != NULL)
-	{
-		if (i->nombre == _nombre)
-			{
+    {
+        if (i->nombre == _nombre)
+            {
                 return i;
             }
-		i = i->sig;
-	}
+        i = i->sig;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 void red::Inserta_enrutador(string nombre)
@@ -55,6 +55,7 @@ void red::Inserta_enrutador(string nombre)
     else
     {
         cout << "Ese enrutador ya existe en el grafo" << endl;
+
     }
 }
 
@@ -63,9 +64,14 @@ void red::Inserta_arista(string ori, string destino, int distancia)
     enrutador* Ruter_ori = Obtenerenrutador(ori);
     enrutador* Ruter_destino = Obtenerenrutador(destino);
 
-    if (Ruter_ori == NULL or Ruter_destino == NULL)
+    if (Ruter_ori == NULL)
     {
-        cout << "El enrutador no existe" << endl;
+        Inserta_enrutador(ori);
+
+    }
+    if (Ruter_destino == NULL)
+    {
+        Inserta_enrutador(destino);
     }
     if (Ruter_ori != NULL &&Ruter_destino != NULL)
     {
@@ -90,6 +96,7 @@ void red::Inserta_arista(string ori, string destino, int distancia)
 void red::MostrarLista()
 {
     enrutador* i = primero;
+
     while (i != NULL)
     {
         arista* j = i->ari;
@@ -106,17 +113,19 @@ void red::MostrarLista()
 
 void red::MostrarMatris()
 {
-     enrutador* i = primero;
+    enrutador* i = primero;
+
     while (i != NULL)
     {
-        cout << "|  | "    << i ->nombre;
         arista* j = i->ari;
+        cout << "| "<< i ->nombre;
 
         while (j != NULL)
         {
-            cout << "| "<< j->destino->nombre << " | " << j->distancia << " |" << endl  ;
+            cout << " | "  << j->destino->nombre << " |" ;
             j = j->sig;
-        } 
+        }
+        cout << endl;
         i = i->sig;
     }
 }
@@ -282,8 +291,6 @@ void red::cargarRedDesdeArchivo(const string &nombreArchivo)
     int distancia;
     while (archivo >> nombre >> destino >> distancia)
     {
-        Inserta_enrutador(nombre);
-        Inserta_enrutador(destino);
 
         Inserta_arista(nombre,destino,distancia);
         Inserta_arista(destino,nombre,distancia);
@@ -305,7 +312,7 @@ void red::guardarRedEnArchivo(const string &nombreArchivo) {
 
         while (j != NULL)
         {
-            archivo << i ->nombre << " " << j->destino->nombre  << " " << j->distancia;
+            archivo << i ->nombre << " " << j->destino->nombre  << " " << j->distancia << '\n';
             j = j->sig;
         }
         i = i->sig;
@@ -395,7 +402,7 @@ void red::Dijkstra(string origen, string destino)
         while (vActual != NULL)
         {
             cout << vActual->nombre;
-            if (vActual != Ruter_ori) 
+            if (vActual != Ruter_ori)
             {
                 cout << "<-";
             }
@@ -403,7 +410,7 @@ void red::Dijkstra(string origen, string destino)
         }
         cout << endl;
     }
-    
+
 }
 
 int GenerarCadenaAleatoria(int min, int max) {
@@ -419,12 +426,12 @@ void red::Erdos_renyi(int N_enrutadores, int Probabilidad)
     map<enrutador*, map<enrutador*, int>> matriz;
 
     map<string, map<string, int>> distancias;
-    
+
     int j = 1;
         for (int i = 1; i <= N_enrutadores; ++i)
         {
             string nodeName = "";
-            for (int k = 1; i <= j; ++i) 
+            for (int k = 1; i <= j; ++i)
             {
                 string cadena = string(1, static_cast<char>(GenerarCadenaAleatoria(65, 90)));
                 nodeName += cadena;
@@ -433,10 +440,10 @@ void red::Erdos_renyi(int N_enrutadores, int Probabilidad)
                 {
                     j= j +1;
                 }
-            
+
             Inserta_enrutador(nodeName);
         }
-        
+
         default_random_engine generator(time(0));
         uniform_real_distribution<double> distribution(0.0, 1.0);
         uniform_int_distribution<int> weight_distribution(1, 100);
