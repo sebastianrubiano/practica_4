@@ -6,10 +6,13 @@ int main()
 {
     red* Red = new red();
     int opc = 0;
-    while (opc <= 10)
-	{
-		system("cls");
-		cout << "1. Insertar vertice" << endl;
+    string archivo = "red.txt";
+    while (opc != 10)
+	{   
+
+		
+        cout << "*** menu de la practica ***" << endl;
+        cout << "1. Insertar vertice" << endl;
 		cout << "2. Insertar arista" << endl;
 		cout << "3. Eliminar vertice" << endl;
         cout << "4. Eliminar arista" << endl;
@@ -23,8 +26,8 @@ int main()
 		cout << "Ingrese una opcion del menu: ";
 		cin >> opc;
 
-		system("cls");
-        string archivo = "red.txt";
+		
+        
         Red->cargarRedDesdeArchivo(archivo);
 
 		switch (opc)
@@ -127,7 +130,6 @@ int main()
                     cout << "Ingrese el nombre del vertice destino: ";
                     cin >> destino;
                     Red->Dijkstra(origen, destino);
-                    Red->MostrarLista();
                 }
                 break;
             }
@@ -139,11 +141,14 @@ int main()
                 cout << "Ingrese la probabilidad: ";
                 cin >> probabilidad;
                 Red->Erdos_renyi(N_ruters, probabilidad);
-                Red->MostrarLista();
                 break;
             }
-            Red->guardarRedEnArchivo(archivo);
+            case 9:
+            {
+                Red->MostrarMatris();
+            }
         }
+        Red->guardarRedEnArchivo(archivo);
     } 
     return 0;
 }
