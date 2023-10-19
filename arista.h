@@ -13,8 +13,8 @@ class enrutador;
 class arista
 {
 private:
-
-    int distancia;
+    
+    long long distancia;
     arista* sig;
     enrutador* destino;
     friend class red;
