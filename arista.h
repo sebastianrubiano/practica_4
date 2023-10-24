@@ -1,8 +1,6 @@
 #ifndef ARISTA_H
 #define ARISTA_H
 
-#pragma once
-
 #include <iostream>
 #include <string>
 #include <fstream>

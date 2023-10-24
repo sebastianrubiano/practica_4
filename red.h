@@ -1,6 +1,6 @@
 #ifndef RED_H
 #define RED_H
-#pragma once
+
 #include "enrutador.h"
 #include "arista.h"
 #include <map>
@@ -32,8 +32,9 @@ private:
     void cargarRedDesdeArchivo(const string& nombreArchivo);
     void guardarRedEnArchivo(const string &nombreArchivo);
     void Dijkstra(string origen, string destino);
+    void Dijkstras(string origen);
     void Erdos_renyi(int N_enrutadores, int Probabilidad);
-    void MostrarMatris();
+    void MostrarMatrices();
 };
 
 #endif // RED_H

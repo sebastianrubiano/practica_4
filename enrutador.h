@@ -1,7 +1,7 @@
 #ifndef ENRUTADOR_H
 #define ENRUTADOR_H
 
-#pragma once
+
 
 #include <iostream>
 #include <string>
@@ -24,4 +24,5 @@ private:
     friend class red;
 };
 
-#endif
+
+#endif // ENRUTADOR_H

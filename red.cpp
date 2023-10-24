@@ -111,25 +111,6 @@ void red::MostrarLista()
     }
 }
 
-void red::MostrarMatris()
-{
-    enrutador* i = primero;
-
-    while (i != NULL)
-    {
-        arista* j = i->ari;
-        cout << "| "<< i ->nombre;
-
-        while (j != NULL)
-        {
-            cout << " | "  << j->destino->nombre << " |" ;
-            j = j->sig;
-        }
-        cout << endl;
-        i = i->sig;
-    }
-}
-
 void red::eliminar_aristas(enrutador *ruter)
 {
     if (ruter == NULL)
@@ -142,8 +123,7 @@ void red::eliminar_aristas(enrutador *ruter)
     {
         i = ruter->ari;
         ruter->ari = ruter->ari->sig;
-        cout << "enrutador" << ruter->nombre << "->" << i->destino->nombre << "eliminada" << endl;
-        delete(i);
+         delete(i);
         break;
     }
 }
@@ -153,15 +133,15 @@ void red::eliminar_aristadestino(string destino)
     enrutador* i = primero;
     while (i != NULL)
     {
-        if (i->nombre == destino)
+        if (i->nombre == destino || i->ari == NULL)
         {
+            i= i->sig;
             continue;
         }
         if (i->ari->destino->nombre == destino)
         {
             arista* j = i->ari;
             i->ari = i->ari->sig;
-            cout << "arista" << destino << "->" << j->destino->nombre << "fue eliminada" << endl;
             delete(j);
         }
         else
@@ -173,14 +153,13 @@ void red::eliminar_aristadestino(string destino)
                 if (y->destino->nombre == destino)
                 {
                     x->sig = y->sig;
-                    cout << "arista" << i->nombre << "->" << destino << "fue eliminada" << endl;
                     delete(y);
-                    break;
-                }
+                 }
                 x = y;
                 y = y->sig;
             }
         }
+        i = i->sig;
     }
 }
 
@@ -192,7 +171,6 @@ void red::eliminar_vertice(string nombre)
         primero = primero->sig;
         eliminar_aristas(i);
         eliminar_aristadestino(i->nombre);
-        cout << "enrutador" << nombre << "fue eliminado" << endl;
         delete(i);
         tamaño--;
     }
@@ -273,10 +251,10 @@ void red::eliminar_todo()
         primero = primero->sig;
         eliminar_aristas(i);
         eliminar_aristadestino(i->nombre);
-        cout << "Vertice " << i->nombre << " eliminado" << endl;
         delete(i);
         tamaño--;
     }
+    cout << "se elimino la base de datos" <<endl;
 }
 
 void red::cargarRedDesdeArchivo(const string &nombreArchivo)
@@ -298,6 +276,7 @@ void red::cargarRedDesdeArchivo(const string &nombreArchivo)
     archivo.close();
 }
 
+
 void red::guardarRedEnArchivo(const string &nombreArchivo) {
     ofstream archivo(nombreArchivo);
 
@@ -305,35 +284,42 @@ void red::guardarRedEnArchivo(const string &nombreArchivo) {
         cerr << "No se pudo abrir el archivo para escritura." << endl;
         return;
     }
+
+    set<pair<string, string>> aristasGuardadas;  // Conjunto para rastrear aristas ya guardadas
+
     enrutador* i = primero;
-    while (i != NULL)
-    {
+    while (i != NULL) {
         arista* j = i->ari;
 
-        while (j != NULL)
-        {
-            archivo << i ->nombre << " " << j->destino->nombre  << " " << j->distancia << '\n';
-            j = j->sig;
-        }
+        while (j != NULL) {
+                // Verificar si el par inverso ya se ha guardado
+                pair<string, string> aristaActual(i->nombre, j->destino->nombre);
+                pair<string, string> aristaInversa(j->destino->nombre, i->nombre);
+                if (aristasGuardadas.count(aristaActual) == 0 && aristasGuardadas.count(aristaInversa) == 0) {
+                    archivo << i->nombre << " " << j->destino->nombre << " " << j->distancia << '\n';
+                    aristasGuardadas.insert(aristaActual);
+                }
+                j = j->sig;
+            }
+
         i = i->sig;
     }
-
 
     archivo.close();
     cout << "Red guardada en el archivo " << nombreArchivo << endl;
 }
+
 
 bool CostoMinimo(const pair<enrutador*, int>& a, const pair<enrutador*, int>& b)
 {
     return a.second < b.second;
 }
 
-
 void red::Dijkstra(string origen, string destino)
 {
     enrutador* Ruter_ori = Obtenerenrutador(origen);
-    enrutador* Ruter_des = Obtenerenrutador(destino);
-    if (Ruter_ori == NULL or Ruter_des == NULL)
+    enrutador* Ruter_des = Obtenerenrutador(destino);//des
+    if (Ruter_ori == NULL or Ruter_des == NULL)//DES
     {
         cout << "El enrutador no existe" << endl;
     }
@@ -396,8 +382,7 @@ void red::Dijkstra(string origen, string destino)
 
             cola.erase(iter->first);
         }
-        cout << "Distancia mínima desde " << origen << " a " << destino << ": " << distancias[Ruter_des] << endl;
-        cout << "Ruta desde " << origen << " a " << destino << ": ";
+        cout << "Ruta desde " << origen << " a " << destino << ": ";//Des
         enrutador* vActual = Ruter_des;
         while (vActual != NULL)
         {
@@ -411,6 +396,91 @@ void red::Dijkstra(string origen, string destino)
         cout << endl;
     }
 
+}
+
+void red::Dijkstras(string origen)
+{
+    enrutador* Ruter_ori = Obtenerenrutador(origen);
+    if (Ruter_ori == NULL )
+    {
+        cout << "El enrutador no existe" << endl;
+    }
+    else
+    {
+        map<enrutador*, map<enrutador*, int>> matriz;
+        map<enrutador*, bool>visitados;
+        map<enrutador*, enrutador*> rutas;
+        map<enrutador*, int> cola;
+        map<enrutador*, int> distancias;
+
+        enrutador* vi = primero;
+        while (vi != NULL)
+        {
+            visitados[vi] = false;
+            rutas[vi] = NULL;
+            distancias[vi] = numeric_limits<int>::max();
+            enrutador* vj = primero;
+
+            while (vj != NULL)
+            {
+                matriz[vi][vj] = numeric_limits<int>::max();
+                vj = vj->sig;
+            }
+
+            arista* aj = vi->ari;
+
+            while (aj != NULL)
+            {
+                matriz[vi][aj->destino] = aj->distancia;
+                aj = aj->sig;
+            }
+
+            vi = vi->sig;
+        }
+
+        distancias[Ruter_ori] = 0;
+        visitados[Ruter_ori] = true;
+        cola[Ruter_ori] = distancias[Ruter_ori];
+
+        while (!cola.empty())
+        {
+            map<enrutador*, int>::iterator iter = min_element(cola.begin(), cola.end(), CostoMinimo);
+            visitados[iter->first] = true;
+            arista* ai = iter->first->ari;
+            while (ai != NULL)
+            {
+                if (!visitados[ai->destino])
+                {
+                    if (distancias[ai->destino] > distancias[iter->first] + matriz[iter->first][ai->destino])
+                    {
+                        distancias[ai->destino] = distancias[iter->first] + matriz[iter->first][ai->destino];
+                        rutas[ai->destino] = iter->first;
+                        cola[ai->destino] = distancias[ai->destino];
+                    }
+                }
+
+                ai = ai->sig;
+            }
+
+            cola.erase(iter->first);
+        }
+
+        for (map<enrutador*, enrutador*>::iterator i = rutas.begin(); i != rutas.end(); i++)
+        {
+
+            enrutador* vActual = i->first;
+
+            while (vActual != NULL)
+            {
+                if ( vActual->nombre!=origen)
+                {
+                     cout << vActual->nombre << "<-";
+                 }
+                vActual = rutas[vActual];
+            }
+             cout<< origen << endl;
+        }
+    }
 }
 
 int GenerarCadenaAleatoria(int min, int max) {
@@ -431,7 +501,7 @@ void red::Erdos_renyi(int N_enrutadores, int Probabilidad)
         for (int i = 1; i <= N_enrutadores; ++i)
         {
             string nodeName = "";
-            for (int k = 1; i <= j; ++i)
+            for (int K = 1; K <= j; ++K)
             {
                 string cadena = string(1, static_cast<char>(GenerarCadenaAleatoria(65, 90)));
                 nodeName += cadena;
@@ -444,26 +514,85 @@ void red::Erdos_renyi(int N_enrutadores, int Probabilidad)
             Inserta_enrutador(nodeName);
         }
 
-        default_random_engine generator(time(0));
+        default_random_engine generator(static_cast<mt19937::result_type>(time(0)));
         uniform_real_distribution<double> distribution(0.0, 1.0);
         uniform_int_distribution<int> weight_distribution(1, 100);
 
         enrutador* i = primero;
         while (i != NULL)
         {
-            arista* j = i->ari;
+            arista* R = i->ari;
 
-            while (j != NULL)
+            while (R != NULL)
             {
-                if (i ->nombre == j->destino->nombre ) {
+                if (i ->nombre == R->destino->nombre ) {
                     continue;  // No se permiten bucles
                 }
                 double random_value = distribution(generator);
                 if (random_value < Probabilidad) {
                     int distancia = weight_distribution(generator);
-                    Inserta_arista(i ->nombre, j->destino->nombre, distancia);
-                    Inserta_arista(j->destino->nombre, i ->nombre, distancia);
+                    Inserta_arista(i ->nombre, R->destino->nombre, distancia);
+                    Inserta_arista(R->destino->nombre, i ->nombre, distancia);
                 }
             }
         }
 }
+
+void printmatriz(const map<string, map<string, int>>& datos) {
+
+    set<string> filas;
+    set<string> columnas;
+
+    for (const auto& par1 : datos) {
+        filas.insert(par1.first);
+        for (const auto& par2 : par1.second) {
+            columnas.insert(par2.first);
+        }
+    }
+
+    int longitudCelda = 8;
+
+    cout << "        |";
+    for (const string& columna : columnas) {
+        cout << columna << string(longitudCelda- static_cast<int>(columna.size()), ' ') << "|";
+    }
+    cout << "\n";
+    for (int i = 0; i < static_cast<int>(longitudCelda+1) * static_cast<int>(columnas.size()+1); i++) {
+        cout << "-";
+    }
+    cout << "\n";
+
+    for (const string& fila : filas) {
+        cout << fila << string(longitudCelda - fila.size(), ' ') << "|";
+        for (const string& columna : columnas) {
+            if (datos.at(fila).count(columna) > 0) {
+                cout << datos.at(fila).at(columna) << string(longitudCelda - to_string(datos.at(fila).at(columna)).size(), ' ') << "|";
+            } else {
+                cout <<"0"<< string(longitudCelda-1, ' ') << "|";
+            }
+        }
+        cout << "\n";
+
+        for (int i = 0; i < static_cast<int>(longitudCelda+1) * static_cast<int>(columnas.size()+1) ; i++) {
+            cout << "-";
+        }
+        cout << "\n";
+    }
+}
+
+void red::MostrarMatrices(){
+    map<string, map<string, int>> datos;
+    enrutador* i = primero;
+    while (i != NULL)
+    {
+        arista* j = i->ari;
+        while (j != NULL)
+        {
+            datos[i->nombre][j->destino->nombre] = j->distancia;
+            j = j->sig;
+        }
+        i = i->sig;
+    }
+    printmatriz(datos);
+}
+
